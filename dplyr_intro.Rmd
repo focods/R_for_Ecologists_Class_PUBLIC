@@ -1,0 +1,101 @@
+---
+title: "Data manipulation using dplyr"
+output:
+  html_document: default
+  html_notebook: default
+  pdf_document: default
+---
+
+####Dave Millar  
+####dave.millar@uwyo.edu
+####R for Ecologists  
+####11/15/17  
+
+This R notebook contains a VERY brief overview of **`dplyr`**, using several examples with sample data. The five primary functions for **`dplyr`** include:
+
+1. **`mutate()`**
+2. **`select()`**
+3. **`filter()`**
+4. **`summarize()`**
+5. **`arrange()`**
+
+
+First, let's clear everything out of memory, call [dplyr](http://dplyr.tidyverse.org/) and create a data frame full of example data to work with. Note that the **`gather()`** function from [tidyr](http://tidyr.tidyverse.org/) is used create the long format version of the data frame.
+
+```{r}
+rm(list=ls())
+
+library(dplyr)
+library(tidyr)
+
+var1 <- rnorm(100,5.3,1.2)
+var2 <- rnorm(100,6.1,1.7)
+var3 <- rnorm(100,9.5,1.4)
+var4 <- rnorm(100,1.2,0.5)
+var5 <- rnorm(100,8.5,1.2)
+
+# wide format
+cat_data <- cbind.data.frame(var1, var2, var3, var4, var5)
+
+# long format
+cat_data_gg <- cat_data %>% gather("var1", "var2", "var3", "var4", "var5",
+                                   key = "variable", value = "value")
+
+
+```
+
+###1. Mutate
+
+The is function allows you create a new variable (column within a data frame or tibble) as a function of existing variables within the same data frame.
+```{r}
+
+cat_data_mut <- cat_data %>% mutate(
+  newCol = var1 * var3 + 5 / var5
+)
+
+head(cat_data_mut)
+```
+
+###2. Select
+
+The is function allows you to 'select' specific variables within a data frame or tibble.
+```{r}
+
+cat_data_sel <- select(cat_data, var2:var4)
+head(cat_data_sel)
+```
+
+###3. Filter
+
+The is function allows you to 'filter' out specific rows of a data frame based on variable values. Below is a simple example using arithmetic operators.
+```{r}
+
+cat_data_filt <- filter(cat_data, var1 > 3 & var5 <= 7.5)
+head(cat_data_filt)
+```
+
+###4. Summarize
+
+The is function allows you to summarize variables in a data frame using various functions. Here, we'll summarize each variable by calculating its mean and standard deviation. Note that the summary statistics match those used to create each vector of data for each variable using **`rnorm()`** above.
+```{r}
+
+cat_data_summarized <- cat_data_gg %>%
+               group_by(variable) %>% 
+               summarize(mean = mean(value),sd = sd(value))
+cat_data_summarized
+```
+
+###5. Arrange
+
+The is function allows you to arrange (or rearrange) data in a data frame based on a user-defined condition. Here let's just rearrange the rows in **`cat_data`** so that the values for **`var3`** are in ascending order, then again in descending order.
+```{r}
+
+cd_var3_asc <- arrange(cat_data, var3)
+head(cd_var3_asc)
+
+cd_var3_desc <- arrange(cat_data, desc(var3))
+head(cd_var3_desc)
+
+```
+
+Hopefully this very brief overview was helpful in better understanding some of the new tidyverse methods for data manipulation in R. At the very least, it hopefully provides an efficient alternative for doing this type of data *wrangling* in Excel. Lastly, for more examples and detailed info, definitely check out the [dplyr](http://dplyr.tidyverse.org/) link mentioned above.
